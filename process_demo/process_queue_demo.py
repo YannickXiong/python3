@@ -18,7 +18,8 @@ def producer1(queue):
 def consumer1(queue):
     while True:
         try:
-            print("consumer1 got data {_data} from queue.".format(_data=queue.get(block=True, timeout=1)))
+            _data = queue.get(block=True, timeout=1)
+            print("consumer1 got data {_data} from queue.".format(_data=_data))
             time.sleep(3)
         except Exception as e:
             print("consumer1 found exception => ", e)
