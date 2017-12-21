@@ -8,11 +8,11 @@ import time
 
 
 # 有锁，使用上下文管理
-def safe_producter(w_lock, f):
+def safe_producer(w_lock, f):
     with w_lock:
         fp = open(f, 'a+')
         for i in range(10):
-            fp.write("safe_producter :: write {num} to file. \n".format(num=i))
+            fp.write("safe_producer :: write {num} to file. \n".format(num=i))
             time.sleep(1)
         fp.close()
 
@@ -39,7 +39,7 @@ def unsafe_producter(f):
 if __name__ == "__main__":
     lock = multiprocessing.Lock()
     log = "process_lock_demo.log"
-    sp = multiprocessing.Process(target=safe_producter, args=(lock, log))
+    sp = multiprocessing.Process(target=safe_producer, args=(lock, log))
     sp1 = multiprocessing.Process(target=safe_producter1, args=(lock, log))
     usp = multiprocessing.Process(target=unsafe_producter, args=(log,))
 

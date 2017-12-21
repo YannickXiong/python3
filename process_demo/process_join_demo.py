@@ -20,6 +20,7 @@ class ClockProcess(multiprocessing.Process):
             time.sleep(self.interval)
             n -= 1
 
+
 if __name__ == '__main__':
     print("the main process begins ..")
     p = ClockProcess(1)
