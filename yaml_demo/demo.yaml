@@ -1,0 +1,5 @@
+TestCase:
+    CREATE_CARD:
+        ATM_CREATE_CARD:
+          ATM_CREATE_CARD_INVALID_PASSWORD: "ATM创建卡片，非法密码，创建失败"
+    IMPORT_CARD: "X"
