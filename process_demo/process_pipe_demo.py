@@ -8,32 +8,33 @@ import multiprocessing
 import time
 
 
-def producer1(pipe, maxLen):
+def producer1(pipesig, maxlen):
     i = 0
     try:
-        while i < maxLen:
+        while i < maxlen:
             print("producer1 send data {_data} into pip .. {_time}"
                   .format(_data=i, _time=time.ctime()))
-            pipe[0].send(i)
+            pipesig[0].send(i)
             time.sleep(1)
             i += 1
     except Exception as e:
         print("producer1 meet an exception : ", e)
     finally:
-        pipe[0].close()
+        pipesig[0].close()
 
 
-def consumer1(pipe):
+def consumer1(pipesig):
     try:
         while True:
-            _data = pipe[1].recv()
+            _data = pipesig[1].recv()
             print("consumer1 receive data {_data} from pip .. {_time}"
                   .format(_data=_data, _time=time.ctime()))
             time.sleep(1)
     except Exception as e:
         print("consumer1 meet an exception : ", e)
     finally:
-        pipe[1].close()
+        pipesig[1].close()
+
 
 if __name__ == "__main__":
     pipe = multiprocessing.Pipe()  # default duplex = True
