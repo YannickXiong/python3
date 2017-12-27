@@ -8,52 +8,67 @@ import yaml
 import logging
 import logging.config
 
+__config__ = "log_demo.conf"
+
 
 def get_log_level(config_file):
 
-    try:
-        with open(config_file) as fp:
-            config = yaml.load(fp)
+    # 没有必要，不配置就给个默认值就OK
+    # try:
+    #     with open(config_file) as fp:
+    #         config = yaml.load(fp)
+    #
+    #     if config.__contains__("logLevel"):
+    #         _level = config["logLevel"].upper()
+    #     else:
+    #         raise KeyError("configure item <logLevel> doesn't exist in the the configuration file: "
+    #                        + __config__ + "!")
+    # finally:
+    #     return _level
+    with open(config_file) as fp:
+        config = yaml.load(fp)
 
-        if config.__contains__("loglevel"):
-            return config["loglevel"].upper()
-        else:
-            raise KeyError("loglevel doesn't exist in config file!")
-    except Exception as e:
-        print(e)
-    finally:
-        return "DEBUG"
+        if config.__contains__("logLevel"):
+            return config["logLevel"]
+
+        return "NOTSET"
 
 
 class Log:
 
     def __init__(self):
-        self.log_level = get_log_level("conf.yaml")
-        self.log_conf_file = "log_demo.conf"
-
+        # 如果放在这里，所有子类都会隐式调用get_log_level，当有异常时，同一异常会抛出多次打印
+        # self.log_level = get_log_level("conf.yaml")
+        self.log_conf_file = __config__
 
 
 class LogDebug(Log):
 
+    def __init__(self):
+        super(LogDebug, self).__init__()
+
     def get_logger(self):
         logging.config.fileConfig(self.log_conf_file)
-        print("LogDebug")
         return logging.getLogger("logDebug")
 
 
-class LogInfo(Log):
+class LogWarn(Log):
+
+    def __init__(self):
+        super(LogWarn, self).__init__()
 
     def get_logger(self):
         logging.config.fileConfig(self.log_conf_file)
-        print("LogInfo")
-        return logging.getLogger("logInfo")
+        return logging.getLogger("logWarn")
 
 
 class LogError(Log):
 
+    def __init__(self):
+        super(LogError, self).__init__()
+
     def get_logger(self):
         logging.config.fileConfig(self.log_conf_file)
-        print("LogError")
         return logging.getLogger("logError")
 
 
@@ -62,13 +77,17 @@ class LogFactory:
     def __init__(self):
         self.log_level = get_log_level("conf.yaml")
         self.log_set = {
+            "NOTSET": LogDebug(),
             "DEBUG": LogDebug(),
-            "INFO": LogInfo(),
-            "ERROR": LogError()
+            "INFO": LogDebug(),
+            "WARN": LogWarn(),
+            "ERROR": LogError(),
+            "CRITICAL": LogError()
         }
 
     def logger(self):
         return self.log_set[self.log_level]
+
 
 if __name__ == "__main__":
     log_factory = LogFactory()

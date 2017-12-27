@@ -1,1 +1,1 @@
-loglevel: error
+logFile: "../log/run.log"
