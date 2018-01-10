@@ -1,1 +1,2 @@
-logFile: "../log/run.log"
+log:
+  logLevel: DEBUG

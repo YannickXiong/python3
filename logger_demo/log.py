@@ -28,8 +28,8 @@ def get_log_level(config_file):
     with open(config_file) as fp:
         config = yaml.load(fp)
 
-        if config.__contains__("logLevel"):
-            return config["logLevel"]
+        if config["log"].__contains__("logLevel"):
+            return config["log"]["logLevel"]
 
         return "NOTSET"
 
