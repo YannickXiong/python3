@@ -213,7 +213,8 @@ print("在main()外处理task结果--以return await asyncio.wait(jobs)返回")
 for done in dones:
     print('Done task ret: ', done.result())
 
-if len(pendings) < 1:
+# if len(pendings) < 1:
+if not pendings:
     print("pendings is empty ", pendings)
 else:
     for pending in pendings:
