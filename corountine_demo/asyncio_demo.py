@@ -1,5 +1,7 @@
 import asyncio
 import functools
+import time
+
 
 # 参考： http://python.jobbole.com/87541/
 
@@ -114,4 +116,132 @@ print("-"*25)
 task3 = loop2.create_task(do_some_work2("using loop.create_task"))
 loop2.run_until_complete(task3)
 
+print("-"*25)
+
+
+# 以下部分参考：http://python.jobbole.com/87310/
+def now():
+    return time.time()
+
+
+async def do_some_work(t):
+    print('Waiting: ', t)
+
+    await asyncio.sleep(t)
+    return 'Done after {}s'.format(t)
+
+
+async def main():
+    coroutine1 = do_some_work(1)
+    coroutine2 = do_some_work(2)
+    coroutine3 = do_some_work(4)
+
+    jobs = [
+        asyncio.ensure_future(coroutine1),
+        asyncio.ensure_future(coroutine2),
+        asyncio.ensure_future(coroutine3)
+    ]
+
+    # asyncio.wait返回(done, pending)，即返回task，task.result是返回结果
+    dones, pendings = await asyncio.wait(jobs)
+
+    print("result return by asyncio.wait():")
+    for task in dones:
+        print('Task ret: ', task.result())
+
+    # asyncio.gather()直接返回结果
+    print("result return by asyncio.gather():")
+    # 一定要注意asyncio.gather(*jobs)，是一个可变参数，不是位置参数，不能直接传asyncio.gather(jobs)
+    rets = await asyncio.gather(*jobs)
+    for ret in rets:
+        print('Task ret: ', ret)
+
+start = now()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
+
+# 并发机制，时间是4秒而不是7秒
+print('TIME: ', now() - start)
+
+# 上面不管是asyncio.wait(jobs)，还是asyncio.gather(*jobs)，都是在main()中处理task执行的结果
+# 下面是3种在main()函数外处理task结果的例子
+
+print("-"*25)
+
+
+async def main2():
+    coroutine1 = do_some_work(1)
+    coroutine2 = do_some_work(3)
+    coroutine3 = do_some_work(5)
+
+    jobs = [
+        asyncio.ensure_future(coroutine1),
+        asyncio.ensure_future(coroutine2),
+        asyncio.ensure_future(coroutine3)
+    ]
+
+    return await asyncio.gather(*jobs)
+
+start = now()
+results = loop2.run_until_complete(main2())
+print("在main()外处理task结果--以return await asyncio.gather(*jobs)返回")
+for result in results:
+    print('Task ret: ', result)
+
+print('TIME: ', now() - start)
+
+print("-"*25)
+
+
+async def main3():
+    coroutine1 = do_some_work(2)
+    coroutine2 = do_some_work(1)
+    coroutine3 = do_some_work(3)
+
+    jobs = [
+        asyncio.ensure_future(coroutine1),
+        asyncio.ensure_future(coroutine2),
+        asyncio.ensure_future(coroutine3)
+    ]
+
+    return await asyncio.wait(jobs)
+
+start = now()
+dones, pendings = loop2.run_until_complete(main3())
+print("在main()外处理task结果--以return await asyncio.wait(jobs)返回")
+for done in dones:
+    print('Done task ret: ', done.result())
+
+if len(pendings) < 1:
+    print("pendings is empty ", pendings)
+else:
+    for pending in pendings:
+        print('Pending task ret: ', pending.result())
+
+print('TIME: ', now() - start)
+
+
+print("-"*25)
+
+
+async def main4():
+    coroutine1 = do_some_work(2)
+    coroutine2 = do_some_work(1)
+    coroutine3 = do_some_work(3)
+
+    jobs = [
+        asyncio.ensure_future(coroutine1),
+        asyncio.ensure_future(coroutine2),
+        asyncio.ensure_future(coroutine3)
+    ]
+
+    for task in asyncio.as_completed(jobs):
+        ret = await task
+        print('Task ret: {}'.format(ret))
+
+start = now()
+done = loop2.run_until_complete(main4())
+print("在main()外处理task结果--以asyncio.as_completed(jobs)返回")
+print("done is ", done)
 loop2.close()
